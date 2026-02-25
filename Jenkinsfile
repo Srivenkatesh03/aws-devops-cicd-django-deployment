@@ -44,15 +44,17 @@ pipeline {
                 ]) {
 
                     sh '''
-                    ssh -o StrictHostKeyChecking=no \
-                    -o ProxyJump=ubuntu@$BASTION_IP \
-                    -i $SSH_KEY ubuntu@$PRIVATE_IP "
+                    ssh -i $SSH_KEY \
+                    -o StrictHostKeyChecking=no \
+                    -o ProxyCommand="ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@$BASTION_IP -W %h:%p" \
+                    ubuntu@$PRIVATE_IP << EOF
 
-                    docker pull $DOCKER_IMAGE:latest &&
-                    docker stop $CONTAINER_NAME || true &&
-                    docker rm $CONTAINER_NAME || true &&
+                    docker pull $DOCKER_IMAGE:latest
+                    docker stop $CONTAINER_NAME || true
+                    docker rm $CONTAINER_NAME || true
                     docker run -d -p 8000:8000 --name $CONTAINER_NAME $DOCKER_IMAGE:latest
-                    "
+
+                    EOF
                     '''
                 }
             }
