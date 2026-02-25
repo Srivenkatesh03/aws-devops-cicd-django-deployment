@@ -62,9 +62,8 @@ pipeline {
                     echo "Creating project folder in private EC2"
                         ssh private "mkdir -p ~/app"
 
-                        echo "Copy docker-compose & env to private EC2"
+                        echo "Copy docker-compose"
                         scp docker-compose.yml private:~/app/
-                        scp .env private:~/app/
 
                         echo "Deploying app"
                         ssh private '
