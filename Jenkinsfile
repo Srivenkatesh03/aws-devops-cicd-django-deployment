@@ -44,14 +44,23 @@ pipeline {
                 ]) {
 
                     sh '''
-                    ssh -o StrictHostKeyChecking=no \
-                    -o ProxyJump=ubuntu@$BASTION_IP \
-                    -i $SSH_KEY ubuntu@$PRIVATE_IP "
-                    docker pull $DOCKER_IMAGE:latest &&
-                    docker stop $CONTAINER_NAME || true &&
-                    docker rm $CONTAINER_NAME || true &&
-                    docker run -d -p 8000:8000 --name $CONTAINER_NAME $DOCKER_IMAGE:latest
-                    "
+                        ssh -o StrictHostKeyChecking=no \
+                        -o ConnectTimeout=30 \
+                        -o ServerAliveInterval=60 \
+                        -o ServerAliveCountMax=3 \
+                        -o ProxyJump=ubuntu@$BASTION_IP \
+                        -i $SSH_KEY ubuntu@$PRIVATE_IP << EOF
+
+                        echo "Connected to private server"
+
+                        docker pull srivenkatesh04/sms-app:latest
+                        docker stop sms-app || true
+                        docker rm sms-app || true
+                        docker run -d -p 8000:8000 --name sms-app srivenkatesh04/sms-app:latest
+
+                        echo "DEPLOY DONE"
+                        exit
+                        EOF
                     '''
                 }
             }
@@ -66,14 +75,13 @@ pipeline {
                 ]) {
 
                     sh '''
-                    ssh -o ProxyJump=ubuntu@$BASTION_IP \
-                    -i $SSH_KEY ubuntu@$PRIVATE_IP \
-                    "curl -f http://localhost:8000/ || exit 1"
-                    '''
+                            ssh -o ProxyJump=ubuntu@$BASTION_IP \
+                            -i $SSH_KEY ubuntu@$PRIVATE_IP \
+                            "curl -f http://localhost:8000/ || exit 1"
+                        '''
                 }
             }
         }
-    }
 
     post {
         success {
