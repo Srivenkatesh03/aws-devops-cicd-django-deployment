@@ -70,8 +70,8 @@ pipeline {
                         ssh private '
                         cd ~/app &&
                         docker pull srivenkatesh04/sms-app:latest &&
-                        docker compose down || true &&
-                        docker compose up -d &&
+                        docker-compose down || true &&
+                        docker-compose up -d &&
                         docker ps
                         '
                 """
