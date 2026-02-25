@@ -44,7 +44,7 @@ pipeline {
                 ]) {
 
                     sh '''
-                    ssh -i $SSH_KEY \
+                    ssh -tt -i $SSH_KEY \
                     -o StrictHostKeyChecking=no \
                     -o ProxyCommand="ssh -i $SSH_KEY -o StrictHostKeyChecking=no ubuntu@$BASTION_IP -W %h:%p" \
                     ubuntu@$PRIVATE_IP << EOF
