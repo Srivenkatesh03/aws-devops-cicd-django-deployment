@@ -59,14 +59,21 @@ pipeline {
                     echo "    ProxyJump bastion" >> ~/.ssh/config
                     echo "    StrictHostKeyChecking no" >> ~/.ssh/config
 
-                    echo "Connecting to private EC2 and deploying..."
-                    ssh private '
-                        cd ~/aws-devops-cicd-django-deployment &&
+                    echo "Creating project folder in private EC2"
+                        ssh private "mkdir -p ~/app"
+
+                        echo "Copy docker-compose & env to private EC2"
+                        scp docker-compose.yml private:~/app/
+                        scp .env private:~/app/
+
+                        echo "Deploying app"
+                        ssh private '
+                        cd ~/app &&
                         docker pull srivenkatesh04/sms-app:latest &&
-                        docker-compose down || true &&
-                        docker-compose up -d --build &&
+                        docker compose down || true &&
+                        docker compose up -d &&
                         docker ps
-                    '
+                        '
                 """
             }
         }
