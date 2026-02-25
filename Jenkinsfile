@@ -63,8 +63,8 @@ pipeline {
                     ssh private '
                         cd ~/aws-devops-cicd-django-deployment &&
                         docker pull srivenkatesh04/sms-app:latest &&
-                        docker compose down || true &&
-                        docker compose up -d --build &&
+                        docker-compose down || true &&
+                        docker-compose up -d --build &&
                         docker ps
                     '
                 """
