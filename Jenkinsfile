@@ -64,7 +64,7 @@ pipeline {
                         ssh private "mkdir -p ~/app"
 
                         echo "Copy docker-compose"
-                        scp docker/docker-compose.yml private:~/app/docker-compose.yml
+                        scp docker/docker-compose.yaml private:~/app/docker-compose.yaml
 
                         echo "Deploying app"
                         ssh private '
