@@ -62,7 +62,11 @@ pipeline {
                     echo "    StrictHostKeyChecking no" >> ~/.ssh/config
 
                     echo "Creating project folder in private EC2"
-                        ssh private "mkdir -p ~/app"
+                        ssh private "
+                        sudo mkdir -p ~/app &&
+                        sudo chown -R ubuntu:ubuntu ~/app &&
+                        sudo chmod -R 755 ~/app
+                        "
 
                         echo "Copy docker-compose"
                         scp docker/docker-compose.yaml private:~/app/docker-compose.yaml
