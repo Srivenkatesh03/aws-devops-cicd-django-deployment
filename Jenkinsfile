@@ -10,6 +10,7 @@ pipeline {
 
         stage('Checkout') {
             steps {
+                deleteDir()
                 git branch: 'main',
                     url: 'https://github.com/Srivenkatesh03/aws-devops-cicd-django-deployment.git'
                 echo 'Repo cloned'
