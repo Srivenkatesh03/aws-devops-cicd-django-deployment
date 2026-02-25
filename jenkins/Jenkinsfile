@@ -1,0 +1,27 @@
+pipeline{
+    agent any
+
+    stages {
+        stage('Clone Repo') {
+            steps {
+                git branch: 'main'
+            url: 'https://github.com/Srivenkatesh03/Student_Management_System.git'
+            echo 'Repository cloned successfully'
+            }
+        }
+    }
+
+    stage('Build Image') {
+        steps {
+            sh 'docker build -t sms-app docker/Dockerfile'
+        }
+    }
+
+    stage('Deploy to private EC2') {
+        steps {
+            sh '''
+            ssh ubuntu@
+            '''
+        }
+    }
+}
