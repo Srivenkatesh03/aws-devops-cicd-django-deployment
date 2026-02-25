@@ -39,7 +39,8 @@ pipeline {
             withCredentials([
                 sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
                 string(credentialsId: 'private-ip', variable: 'PRIVATE_IP'),
-                string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
+                string(credentialsId: 'bastion-ip', variable: 'BASTION_IP'),
+                file(credentialsId: 'sms-env', variable: 'ENV_FILE')
             ]) {
                 sh """
                     chmod 600 $SSH_KEY
@@ -65,6 +66,9 @@ pipeline {
 
                         echo "Copy docker-compose"
                         scp docker/docker-compose.yaml private:~/app/docker-compose.yaml
+
+                        echo "Copy env securely"
+                        scp $ENV_FILE private:~/app/.env
 
                         echo "Deploying app"
                         ssh private '
