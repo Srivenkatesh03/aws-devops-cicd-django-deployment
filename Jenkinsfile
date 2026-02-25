@@ -34,48 +34,43 @@ pipeline {
         }
 
         stage('Deploy to Private EC2') {
-            steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
-                    string(credentialsId: 'private-ip', variable: 'PRIVATE_IP'),
-                    string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
-                ]) {
-                    sh '''
-                        chmod 600 $SSH_KEY
+        steps {
+            withCredentials([
+                sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
+                string(credentialsId: 'private-ip', variable: 'PRIVATE_IP'),
+                string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
+            ]) {
+                sh """
+                    chmod 600 $SSH_KEY
 
-                        # Create SSH config to reuse key for both bastion and private EC2
-                        mkdir -p ~/.ssh
-                        cat > /tmp/ssh_config << CONFIG
-                        Host bastion
-                            HostName $BASTION_IP
-                            User $SSH_USER
-                            IdentityFile $SSH_KEY
-                            StrictHostKeyChecking no
+                    echo "Creating SSH config"
+                    mkdir -p ~/.ssh
 
-                        Host private
-                            HostName $PRIVATE_IP
-                            User $SSH_USER
-                            IdentityFile $SSH_KEY
-                            ProxyJump bastion
-                            StrictHostKeyChecking no
-                        CONFIG
+                    echo "Host bastion" > ~/.ssh/config
+                    echo "    HostName $BASTION_IP" >> ~/.ssh/config
+                    echo "    User $SSH_USER" >> ~/.ssh/config
+                    echo "    IdentityFile $SSH_KEY" >> ~/.ssh/config
+                    echo "    StrictHostKeyChecking no" >> ~/.ssh/config
 
-                        ssh -F /tmp/ssh_config \
-                            -o ConnectTimeout=30 \
-                            -o ServerAliveInterval=60 \
-                            -o ServerAliveCountMax=3 \
-                            private \
-                            "docker pull srivenkatesh04/sms-app:latest && \
-                             docker stop sms-app || true && \
-                             docker rm sms-app || true && \
-                             docker run -d -p 8000:8000 --name sms-app srivenkatesh04/sms-app:latest && \
-                             echo DEPLOY DONE"
+                    echo "Host private" >> ~/.ssh/config
+                    echo "    HostName $PRIVATE_IP" >> ~/.ssh/config
+                    echo "    User $SSH_USER" >> ~/.ssh/config
+                    echo "    IdentityFile $SSH_KEY" >> ~/.ssh/config
+                    echo "    ProxyJump bastion" >> ~/.ssh/config
+                    echo "    StrictHostKeyChecking no" >> ~/.ssh/config
 
-                        rm -f /tmp/ssh_config
-                    '''
-                }
+                    echo "Connecting to private EC2 and deploying..."
+                    ssh private '
+                        docker pull srivenkatesh04/sms-app:latest &&
+                        docker stop sms-app || true &&
+                        docker rm sms-app || true &&
+                        docker run -d -p 8000:8000 --name sms-app srivenkatesh04/sms-app:latest &&
+                        docker ps
+                    '
+                """
             }
         }
+    }
 
         stage('Health Check') {
             steps {

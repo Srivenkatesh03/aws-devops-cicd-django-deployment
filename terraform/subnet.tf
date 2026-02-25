@@ -9,6 +9,17 @@ resource "aws_subnet" "Public_subnet" {
   }
 }
 
+resource "aws_subnet" "Public_subnet2" {
+  vpc_id = aws_vpc.main.id
+  cidr_block = var.public_subnet2
+  availability_zone = var.availability_zone2
+  map_public_ip_on_launch = true
+
+  tags = {
+    Name = "public-subnet-2"
+  }
+}
+
 
 resource "aws_subnet" "private_subnet" {
   vpc_id = aws_vpc.main.id
@@ -37,6 +48,11 @@ resource "aws_route_table" "public_rt" {
 
 resource "aws_route_table_association" "public_assoc" {
   subnet_id = aws_subnet.Public_subnet.id
+  route_table_id = aws_route_table.public_rt.id
+}
+
+resource "aws_route_table_association" "public_assoc_2" {
+  subnet_id = aws_subnet.Public_subnet2.id
   route_table_id = aws_route_table.public_rt.id
 }
 

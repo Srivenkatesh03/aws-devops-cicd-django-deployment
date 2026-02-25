@@ -9,3 +9,11 @@ output "private_server_ip" {
 output "jenkins_server_ip" {
   value = aws_instance.jenkins.public_ip
 }
+
+output "alb_dns_name" {
+  value       = aws_alb.app_alb.dns_name
+}
+
+output "alb_url" {
+  value       = "http://${aws_alb.app_alb.dns_name}"
+}
