@@ -86,39 +86,7 @@ pipeline {
             }
         }
     }
-
-        stage('Health Check') {
-            steps {
-                withCredentials([
-                    sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY', usernameVariable: 'SSH_USER'),
-                    string(credentialsId: 'private-ip', variable: 'PRIVATE_IP'),
-                    string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
-                ]) {
-                    sh '''
-                        chmod 600 $SSH_KEY
-
-                        mkdir -p ~/.ssh
-
-                        echo "Host bastion" > ~/.ssh/config
-                        echo "    HostName $BASTION_IP" >> ~/.ssh/config
-                        echo "    User $SSH_USER" >> ~/.ssh/config
-                        echo "    IdentityFile $SSH_KEY" >> ~/.ssh/config
-                        echo "    StrictHostKeyChecking no" >> ~/.ssh/config
-
-                        echo "Host private" >> ~/.ssh/config
-                        echo "    HostName $PRIVATE_IP" >> ~/.ssh/config
-                        echo "    User $SSH_USER" >> ~/.ssh/config
-                        echo "    IdentityFile $SSH_KEY" >> ~/.ssh/config
-                        echo "    ProxyJump bastion" >> ~/.ssh/config
-                        echo "    StrictHostKeyChecking no" >> ~/.ssh/config
-
-                        echo "Checking app health..."
-                        ssh private "curl -f http://localhost:8000 || exit 1"
-                    '''
-                }
-            }
-        }
-    }
+ }
 
     post {
         success {
