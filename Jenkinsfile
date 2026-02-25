@@ -19,7 +19,6 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                cd docker
                 docker build -t $DOCKER_IMAGE:latest docker/Dockerfile .
                 '''
             }
