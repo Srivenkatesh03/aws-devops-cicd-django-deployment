@@ -61,10 +61,10 @@ pipeline {
 
                     echo "Connecting to private EC2 and deploying..."
                     ssh private '
+                        cd ~/aws-devops-cicd-django-deployment &&
                         docker pull srivenkatesh04/sms-app:latest &&
-                        docker stop sms-app || true &&
-                        docker rm sms-app || true &&
-                        docker run -d -p 8000:8000 --name sms-app srivenkatesh04/sms-app:latest &&
+                        docker compose down || true &&
+                        docker compose up -d --build &&
                         docker ps
                     '
                 """
@@ -79,27 +79,17 @@ pipeline {
                     string(credentialsId: 'private-ip', variable: 'PRIVATE_IP'),
                     string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
                 ]) {
-                    sh '''
-                        cat > /tmp/ssh_config << CONFIG
-                            Host bastion
-                                HostName $BASTION_IP
-                                User $SSH_USER
-                                IdentityFile $SSH_KEY
-                                StrictHostKeyChecking no
+                    sh """
+                        chmod 600 $SSH_KEY
 
-                            Host private
-                                HostName $PRIVATE_IP
-                                User $SSH_USER
-                                IdentityFile $SSH_KEY
-                                ProxyJump bastion
-                                StrictHostKeyChecking no
-                            CONFIG
+                        echo "Checking app health..."
 
-                        ssh -F /tmp/ssh_config private \
-                            "curl -f http://localhost:8000/ || exit 1"
-
-                        rm -f /tmp/ssh_config
-                    '''
+                        ssh -o StrictHostKeyChecking=no \
+                            -i $SSH_KEY \
+                            -J $SSH_USER@$BASTION_IP \
+                            $SSH_USER@$PRIVATE_IP \
+                            "curl -f http://localhost:8000 || exit 1"
+                    """
                 }
             }
         }
