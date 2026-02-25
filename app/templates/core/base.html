@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Student Manager{% endblock %}</title>
+
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+
+    {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark">
+    <div class="container-fluid">
+
+        <!-- Hamburger -->
+        <button class="btn btn-dark"
+                type="button"
+                data-bs-toggle="offcanvas"
+                data-bs-target="#sidebar"
+                aria-controls="sidebar">
+            ☰
+        </button>
+
+        <!-- Brand -->
+        <a class="navbar-brand ms-2" href="{% url 'home' %}">
+            Student Manager
+        </a>
+
+        <!-- Right side: username + auth -->
+        <div class="d-flex align-items-center ms-auto">
+            {% if user.is_authenticated %}
+                <span class="text-white me-3">
+                    {{ user.username }}
+                </span>
+
+                <form method="post" action="{% url 'logout' %}" class="mb-0">
+                    {% csrf_token %}
+                    <button class="btn btn-outline-light btn-sm">
+                        Logout
+                    </button>
+                </form>
+            {% else %}
+                <a href="{% url 'login' %}" class="btn btn-outline-light btn-sm">
+                    Login
+                </a>
+            {% endif %}
+        </div>
+
+    </div>
+</nav>
+
+<div class="offcanvas offcanvas-start text-bg-dark"
+     tabindex="-1"
+     id="sidebar"
+     aria-labelledby="sidebarLabel">
+
+    <div class="offcanvas-header">
+        <h5 class="offcanvas-title" id="sidebarLabel">
+            Menu
+        </h5>
+        <button type="button"
+                class="btn-close btn-close-white"
+                data-bs-dismiss="offcanvas">
+        </button>
+    </div>
+
+    <div class="offcanvas-body p-0">
+        <ul class="nav flex-column">
+
+            {% if user.is_authenticated %}
+                <li class="nav-item">
+                    <a class="nav-link text-white px-3"
+                       href="{% url 'student_list' %}">
+                        Students
+                    </a>
+                </li>
+                {% if user.is_authenticated and not user.is_staff %}
+                <li class="nav-item">
+                    <a class="nav-link text-white px-3" href="{% url 'student_attendance' %}">
+                        My Attendance
+                    </a>
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3" href="{% url 'student_monthly_attendance' %}">
+                            Monthly Attendance
+                        </a>
+                    </li>
+                </li>
+                {% endif %}
+
+                {% if user.is_staff %}
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3" href="{% url 'dashboard' %}">Dashboard</a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3"
+                           href="{% url 'student_create' %}">
+                            Add Student
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3"
+                           href="{% url 'marks_create' %}">
+                            Add Marks
+                        </a>
+                    </li>
+
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3" href="{% url 'mark_attendance' %}">
+                            Mark Attendance
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white px-3" href="{% url 'view_attendance' %}">
+                            View Attendance
+                        </a>
+                    </li>
+                {% endif %}
+            {% endif %}
+
+        </ul>
+    </div>
+</div>
+
+
+
+<!-- Main Content -->
+<div class="container">
+
+    <!-- Messages -->
+    {% if messages %}
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        {% endfor %}
+    {% endif %}
+
+    {% block content %}{% endblock %}
+</div>
+
+<!-- Bootstrap JS -->
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+
+</body>
+</html>

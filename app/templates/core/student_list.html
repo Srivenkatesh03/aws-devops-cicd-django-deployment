@@ -1,0 +1,172 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Students{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="mb-0">Students</h3>
+
+        {% if user.is_staff %}
+            <a href="{% url 'student_create' %}" class="btn btn-primary btn-sm">
+                + Add Student
+            </a>
+        {% endif %}
+    </div>
+
+    <!-- Search -->
+    <form method="get" class="mb-3">
+        <div class="input-group">
+            <input
+                type="text"
+                name="q"
+                class="form-control"
+                placeholder="Search by name, email, roll number..."
+                value="{{ query }}"
+            >
+            <button class="btn btn-outline-primary" type="submit">
+                Search
+            </button>
+
+            {% if query %}
+                <a href="{% url 'student_list' %}" class="btn btn-outline-secondary">
+                    Clear
+                </a>
+            {% endif %}
+        </div>
+    </form>
+
+    {% if query %}
+        <p class="text-muted">
+            Showing results for "<strong>{{ query }}</strong>"
+        </p>
+    {% endif %}
+
+    <!-- Table -->
+    <div class="table-responsive">
+        <table class="table table-hover table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>#</th>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Department</th>
+                    <th>Year</th>
+                    <th class="text-center">Marks</th>
+                    {% if user.is_staff %}
+                        <th class="text-center">Actions</th>
+                    {% endif %}
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for student in page_obj %}
+                <tr>
+                    <td>{{ forloop.counter }}</td>
+
+                    <td>
+                        <a href="{% url 'student_detail' student.id %}"
+                           class="fw-semibold text-decoration-none">
+                            {{ student.name }}
+                        </a>
+                    </td>
+
+                    <td>{{ student.email }}</td>
+
+                    <td>
+                        <span class="badge bg-primary">
+                            {{ student.get_department_display }}
+                        </span>
+                    </td>
+
+                    <td>
+                        <span class="badge bg-secondary">
+                            {{ student.year }}
+                        </span>
+                    </td>
+
+                    <td class="text-center">
+                        <a href="{% url 'student_report' student.id %}"
+                            class="btn btn-info btn-sm">
+                            Report
+                        </a>
+
+                    </td>
+
+                    {% if user.is_staff %}
+                    <td class="text-center">
+                        <a href="{% url 'student_update' student.id %}"
+                           class="btn btn-warning btn-sm">
+                            Edit
+                        </a>
+
+                        <a href="{% url 'student_delete' student.id %}"
+                           class="btn btn-danger btn-sm">
+                            Delete
+                        </a>
+                    </td>
+                    {% endif %}
+                </tr>
+
+                {% empty %}
+                <tr>
+                    <td colspan="6" class="text-center text-muted">
+                        No students found
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    {% if user.is_staff %}
+        <a href="{% url 'export_all_students_excel' %}"
+        class="btn btn-success btn-sm">
+        Download Excel
+        </a>
+        {% endif %}
+
+
+    <!-- Pagination -->
+    <nav aria-label="Student list pagination">
+        <ul class="pagination justify-content-center">
+
+            {% if page_obj.has_previous %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?q={{ query }}&page={{ page_obj.previous_page_number }}">
+                        Previous
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Previous</span>
+                </li>
+            {% endif %}
+
+            <li class="page-item active">
+                <span class="page-link">
+                    Page {{ page_obj.number }} of {{ page_obj.paginator.num_pages }}
+                </span>
+            </li>
+
+            {% if page_obj.has_next %}
+                <li class="page-item">
+                    <a class="page-link"
+                       href="?q={{ query }}&page={{ page_obj.next_page_number }}">
+                        Next
+                    </a>
+                </li>
+            {% else %}
+                <li class="page-item disabled">
+                    <span class="page-link">Next</span>
+                </li>
+            {% endif %}
+
+        </ul>
+    </nav>
+
+</div>
+{% endblock %}

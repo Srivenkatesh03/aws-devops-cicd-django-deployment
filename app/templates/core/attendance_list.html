@@ -1,0 +1,51 @@
+{% extends "core/base.html" %}
+
+{% block title %}Attendance{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-3">Attendance</h3>
+
+    <!-- Date Filter -->
+    <form method="get" class="mb-3">
+        <label class="form-label">Select Date</label>
+        <input type="date"
+               name="date"
+               class="form-control"
+               value="{{ date }}"
+               onchange="this.form.submit()">
+    </form>
+
+    {% if attendance_records %}
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Student</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in attendance_records %}
+            <tr>
+                <td>{{ record.student.name }}</td>
+                <td>
+                    {% if record.status == "P" %}
+                        <span class="badge bg-success">Present</span>
+                    {% else %}
+                        <span class="badge bg-danger">Absent</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+        <p class="text-muted">No attendance marked for this date.</p>
+    {% endif %}
+</div>
+ <a href="{% url 'mark_attendance' %}" class="btn btn-secondary">
+            Edit
+        </a>
+{% endblock %}
+

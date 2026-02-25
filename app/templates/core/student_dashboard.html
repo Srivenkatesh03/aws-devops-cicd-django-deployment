@@ -1,0 +1,31 @@
+{% extends "core/base.html" %}
+
+{% block title %}My Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3>Welcome, {{ student.name }}</h3>
+
+    <div class="card mb-3">
+        <div class="card-body">
+            <h5>Academic Summary</h5>
+            <p><strong>Percentage:</strong> {{ student.percentage }}%</p>
+            <p><strong>Attendance:</strong> {{ student.attendance_percentage }}%</p>
+            <p>
+                <strong>Result:</strong>
+                {% if student.result == "PASS" %}
+                    <span class="badge bg-success">PASS</span>
+                {% else %}
+                    <span class="badge bg-danger">FAIL</span>
+                {% endif %}
+            </p>
+        </div>
+    </div>
+
+    <a href="{% url 'student_report' student.id %}" class="btn btn-primary">
+        View Marksheet
+    </a>
+
+</div>
+{% endblock %}

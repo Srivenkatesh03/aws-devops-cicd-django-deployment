@@ -1,0 +1,94 @@
+{% extends "core/base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3 class="mb-4">Analytics Dashboard</h3>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-bg-primary shadow-sm">
+                <div class="card-body">
+                    <h6>Total Students</h6>
+                    <h3>{{ total_students }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-bg-success shadow-sm">
+                <div class="card-body">
+                    <h6>Passed</h6>
+                    <h3>{{ passed_students }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-bg-danger shadow-sm">
+                <div class="card-body">
+                    <h6>Failed</h6>
+                    <h3>{{ failed_students }}</h3>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-3">
+            <div class="card text-bg-dark shadow-sm">
+                <div class="card-body">
+                    <h6>Avg Percentage</h6>
+                    <h3>{{ avg_percentage }}%</h3>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="row mb-4">
+    <div class="col-md-4">
+        <div class="card text-bg-info shadow-sm">
+            <div class="card-body">
+                <h6>Average Attendance</h6>
+                <h3>{{ average_attendance }}%</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4">
+        <div class="card text-bg-warning shadow-sm">
+            <div class="card-body">
+                <h6>Low Attendance (&lt; 75%)</h6>
+                <h3>{{ low_attendance_count }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+    <!-- Department-wise Count -->
+    <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">Students per Department</h5>
+
+            <table class="table table-bordered">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Department</th>
+                        <th>Students</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for dept in department_stats %}
+                    <tr>
+                        <td>{{ dept.department }}</td>
+                        <td>{{ dept.count }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    
+</div>
+{% endblock %}

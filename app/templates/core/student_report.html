@@ -1,0 +1,78 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Student Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h4 class="mb-2">{{ student.name }}</h4>
+            <p class="mb-1"><strong>Email:</strong> {{ student.email }}</p>
+            <p class="mb-1"><strong>Department:</strong> {{ student.get_department_display }}</p>
+            <p class="mb-0"><strong>Year:</strong> {{ student.year }}</p>
+            <p class="mb-0"> <strong>Attendance Percentage: </strong> {{ student.attendance_percentage }}%</p>
+        </div>
+    </div>
+
+        <div class="card shadow-sm mb-4">
+        <div class="card-body">
+            <h5 class="mb-3">Subject-wise Marks</h5>
+
+            <table class="table table-bordered text-center">
+                <thead class="table-dark">
+                    <tr>
+                        <th>Subject</th>
+                        <th>Marks Obtained</th>
+                        <th>Max Marks</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for mark in marks %}
+                    <tr>
+                        <td>{{ mark.subject.name }}</td>
+                        <td>{{ mark.marks_obtained }}</td>
+                        <td>{{ mark.subject.max_marks }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-muted">
+                            No marks entered yet
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+        <div class="card shadow-sm">
+        <div class="card-body">
+            <h5 class="mb-3">Result Summary</h5>
+
+            <p><strong>Total Marks:</strong> {{ student.total_marks_obtained }} / {{ student.total_max_marks }}</p>
+
+            <p><strong>Percentage:</strong> {{ student.percentage }}%</p>
+
+            {% if student.result == "PASS" %}
+                <span class="badge bg-success fs-6">PASS</span>
+            {% else %}
+                <span class="badge bg-danger fs-6">FAIL</span>
+            {% endif %}
+        </div>
+    </div>
+    <div class="mt-3">
+            <a href="{% url 'export_student_details' student.id %}"
+            class="btn btn-outline-primary btn-sm">
+                Export Student Details (CSV)
+            </a>
+
+            <a href="{% url 'export_student_marks' student.id %}"
+            class="btn btn-outline-success btn-sm">
+                Export Marks (CSV)
+            </a>
+        </div>
+</div>
+{% endblock %}
+
+

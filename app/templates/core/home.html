@@ -1,0 +1,14 @@
+{% extends "core/base.html" %}
+
+{% block title %}Home{% endblock %}
+
+{% block content %}
+<div class="text-center">
+    <h1 class="mb-3">Student Management System</h1>
+    <p class="lead">Welcome to the Student Management System. Manage your students efficiently and effectively.</p>
+
+    <a href="{% url 'student_list' %}" class="btn btn-primary mt-3">Get Started</a>
+
+
+</div>
+{% endblock %}

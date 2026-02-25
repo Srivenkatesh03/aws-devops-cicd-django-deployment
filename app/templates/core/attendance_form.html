@@ -1,0 +1,62 @@
+{% extends "core/base.html" %}
+{% load dict_extras %}
+{% block title %}Mark Attendance{% endblock %}
+
+{% block content %}
+
+
+<div class="container mt-4">
+
+    <h3 class="mb-3">Mark Attendance</h3>
+    <form method="get" class="mb-3">
+        <label class="form-label">Select Date</label>
+        <input type="date"
+            name="date"
+            class="form-control"
+            value="{{ date }}"
+            onchange="this.form.submit()">
+    </form>
+    <form method="post">
+        {% csrf_token %}
+
+       
+
+        <table class="table table-bordered text-center">
+            <thead class="table-dark">
+                <tr>
+                    <th>Student</th>
+                    <th>Present</th>
+                    <th>Absent</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for student in students %}
+                <tr>
+                    <td>{{ student.name }}</td>
+                    <td>
+                        <input type="radio"
+                            name="status_{{ student.id }}"
+                            value="P"
+                            {% if attendance_map|get_item:student.id == "P" %}checked{% endif %}>
+                    </td>
+                    <td>
+                        <input type="radio"
+                            name="status_{{ student.id }}"
+                            value="A"
+                            {% if attendance_map|get_item:student.id == "A" %}checked{% endif %}>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <button type="submit" class="btn btn-success">
+            Save Attendance
+        </button>
+        <a href="{% url 'dashboard' %}" class="btn btn-secondary">
+            Cancel
+        </a>
+    </form>
+
+</div>
+{% endblock %}

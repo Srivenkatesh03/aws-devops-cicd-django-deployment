@@ -1,0 +1,89 @@
+{% extends "core/base.html" %}
+{% block title %}Monthly Attendance{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+
+    <h3>Monthly Attendance Report</h3>
+
+    <!-- Month Selector -->
+    <form method="get" class="row g-2 mb-4">
+        <div class="col-md-3">
+            <input type="number" name="year" class="form-control"
+                   value="{{ year }}" min="2000">
+        </div>
+        <div class="col-md-3">
+            <input type="number" name="month" class="form-control"
+                   value="{{ month }}" min="1" max="12">
+        </div>
+        <div class="col-md-3">
+            <button class="btn btn-primary">View</button>
+        </div>
+    </form>
+
+    <!-- Summary -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6>Total Days</h6>
+                    <h4>{{ total_days }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6>Present</h6>
+                    <h4>{{ present_days }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6>Absent</h6>
+                    <h4>{{ absent_days }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center">
+                <div class="card-body">
+                    <h6>Attendance %</h6>
+                    <h4>{{ percentage }}%</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Attendance Table -->
+    <table class="table table-bordered text-center">
+        <thead class="table-dark">
+            <tr>
+                <th>Date</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for att in records %}
+            <tr>
+                <td>{{ att.date }}</td>
+                <td>
+                    {% if att.status == 'P' %}
+                        <span class="badge bg-success">Present</span>
+                    {% else %}
+                        <span class="badge bg-danger">Absent</span>
+                    {% endif %}
+                </td>
+            </tr>
+            {% empty %}
+            <tr>
+                <td colspan="2">No attendance for this month</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+</div>
+{% endblock %}
