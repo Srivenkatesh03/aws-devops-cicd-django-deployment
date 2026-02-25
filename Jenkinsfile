@@ -2,8 +2,8 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE = "sms-app"
-        DOCKER_TAG = "${BUILD_NUMBER}"
+        DOCKER_IMAGE = "srivenkatesh04/sms-app"
+        CONTAINER_NAME = "sms-app"
     }
 
     stages {
@@ -11,37 +11,28 @@ pipeline {
         stage('Checkout') {
             steps {
                 git branch: 'main',
-                    url: 'https://github.com/Srivenkatesh03/Student_Management_System.git'
-                echo '✅ Repository cloned successfully'
+                url: 'https://github.com/Srivenkatesh03/aws-devops-cicd-django-deployment.git'
+                echo 'Repo cloned'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                    cd docker
-                    docker build -t ${DOCKER_IMAGE}:${DOCKER_TAG} .
-                    docker tag ${DOCKER_IMAGE}:${DOCKER_TAG} ${DOCKER_IMAGE}:latest
-                """
-                echo '✅ Docker image built successfully'
+                sh '''
+                cd docker
+                docker build -t $DOCKER_IMAGE:latest .
+                '''
             }
         }
 
-        stage('Test') {
+        stage('Push to DockerHub') {
             steps {
-                sh """
-                    docker run --rm ${DOCKER_IMAGE}:${DOCKER_TAG} python manage.py test || echo "No tests found"
-                """
-                echo '✅ Tests completed'
-            }
-        }
-
-        stage('Save Image') {
-            steps {
-                sh """
-                    docker save ${DOCKER_IMAGE}:${DOCKER_TAG} | gzip > ${DOCKER_IMAGE}-${DOCKER_TAG}.tar.gz
-                """
-                echo '✅ Image archived'
+                withCredentials([usernamePassword(credentialsId: 'dockerhub', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
+                    sh '''
+                    echo $PASS | docker login -u $USER --password-stdin
+                    docker push $DOCKER_IMAGE:latest
+                    '''
+                }
             }
         }
 
@@ -50,41 +41,21 @@ pipeline {
                 withCredentials([
                     sshUserPrivateKey(credentialsId: 'ec2-ssh-key', keyFileVariable: 'SSH_KEY'),
                     string(credentialsId: 'private-ip', variable: 'PRIVATE_IP'),
-                    string(credentialsId: 'bastion-ip', variable: 'BASTION_IP'),
-                    string(credentialsId: 'database-url', variable: 'DATABASE_URL')
+                    string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
                 ]) {
 
-                    sh """
-                        # Copy image to private EC2 via bastion
-                        scp -o StrictHostKeyChecking=no \
-                            -o ProxyJump=ubuntu@${BASTION_IP} \
-                            -i ${SSH_KEY} \
-                            ${DOCKER_IMAGE}-${DOCKER_TAG}.tar.gz \
-                            ubuntu@${PRIVATE_IP}:/tmp/
+                    sh '''
+                    ssh -o StrictHostKeyChecking=no \
+                    -o ProxyJump=ubuntu@$BASTION_IP \
+                    -i $SSH_KEY ubuntu@$PRIVATE_IP "
 
-                        # Deploy on private EC2
-                        ssh -o StrictHostKeyChecking=no \
-                            -o ProxyJump=ubuntu@${BASTION_IP} \
-                            -i ${SSH_KEY} \
-                            ubuntu@${PRIVATE_IP} "
-                            
-                            docker load < /tmp/${DOCKER_IMAGE}-${DOCKER_TAG}.tar.gz &&
-                            docker stop sms-app || true &&
-                            docker rm sms-app || true &&
-                            docker run -d \
-                                --name sms-app \
-                                -p 8000:8000 \
-                                --restart unless-stopped \
-                                -e DATABASE_URL='${DATABASE_URL}' \
-                                ${DOCKER_IMAGE}:${DOCKER_TAG} &&
-                            
-                            rm /tmp/${DOCKER_IMAGE}-${DOCKER_TAG}.tar.gz &&
-                            docker image prune -f
-                            "
-                    """
+                    docker pull $DOCKER_IMAGE:latest &&
+                    docker stop $CONTAINER_NAME || true &&
+                    docker rm $CONTAINER_NAME || true &&
+                    docker run -d -p 8000:8000 --name $CONTAINER_NAME $DOCKER_IMAGE:latest
+                    "
+                    '''
                 }
-
-                echo '✅ Deployed to private EC2 successfully'
             }
         }
 
@@ -96,28 +67,22 @@ pipeline {
                     string(credentialsId: 'bastion-ip', variable: 'BASTION_IP')
                 ]) {
 
-                    sh """
-                        ssh -o ProxyJump=ubuntu@${BASTION_IP} \
-                            -i ${SSH_KEY} \
-                            ubuntu@${PRIVATE_IP} \
-                            'curl -f http://localhost:8000/ || exit 1'
-                    """
+                    sh '''
+                    ssh -o ProxyJump=ubuntu@$BASTION_IP \
+                    -i $SSH_KEY ubuntu@$PRIVATE_IP \
+                    "curl -f http://localhost:8000/ || exit 1"
+                    '''
                 }
-
-                echo '✅ Health check passed'
             }
         }
     }
 
     post {
         success {
-            echo '🎉 Pipeline completed successfully!'
+            echo 'DEPLOY SUCCESS'
         }
         failure {
-            echo '❌ Pipeline failed!'
-        }
-        cleanup {
-            sh 'docker system prune -f || true'
+            echo 'DEPLOY FAILED'
         }
     }
 }
