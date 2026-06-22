@@ -15,7 +15,7 @@ output "alb_dns_name" {
 }
 
 output "alb_url" {
-  value       = "http://${aws_alb.app_alb.dns_name}"
+  value       = "https://${aws_alb.app_alb.dns_name}"
 }
 
 output "cloudwatch_dashboard_url" {

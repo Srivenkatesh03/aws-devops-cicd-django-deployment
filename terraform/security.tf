@@ -21,26 +21,21 @@ resource "aws_security_group" "bastion_sg" {
 
 resource "aws_security_group" "private_sg" {
   name = "private-ec2-sg"
-  description = "Allow SSH and HTTP"
+  description = "Allow SSH from Bastion and HTTP from ALB"
   vpc_id = aws_vpc.main.id
 
+  # Restrict SSH access to only the Bastion Host
   ingress {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
+    security_groups = [aws_security_group.bastion_sg.id]
   }
 
+  # Restrict HTTP access to only the Application Load Balancer
   ingress {
     from_port = 80
     to_port = 80
-    protocol = "tcp"
-    cidr_blocks = ["0.0.0.0/0"]
-  }
-
-  ingress {
-    from_port = 8000
-    to_port = 8000
     protocol = "tcp"
     security_groups = [aws_security_group.alb_sg.id]
   }
@@ -92,13 +87,21 @@ resource "aws_security_group" "jenkins_sg" {
 
 resource "aws_security_group" "alb_sg" {
   name = "alb-sg"
-  description = "Allow HTTP"
+  description = "Allow HTTP and HTTPS"
   vpc_id = aws_vpc.main.id
 
   ingress {
     description = "HTTP from internet"
     from_port = 80
     to_port = 80
+    protocol = "tcp"
+    cidr_blocks = [ "0.0.0.0/0" ]
+  }
+
+  ingress {
+    description = "HTTPS from internet"
+    from_port = 443
+    to_port = 443
     protocol = "tcp"
     cidr_blocks = [ "0.0.0.0/0" ]
   }
@@ -113,6 +116,4 @@ resource "aws_security_group" "alb_sg" {
   tags = {
     Name = "alb-sg"
   }
-  
-
 }

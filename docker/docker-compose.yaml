@@ -17,8 +17,9 @@ services:
 
     env_file:
       - .env
-    ports:
-      - "8000:8000"
+    # Removed public port mapping 8000:8000 to isolate the Gunicorn application
+    expose:
+      - "8000"
     depends_on:
       - db
 
@@ -31,6 +32,16 @@ services:
       POSTGRES_PASSWORD: admin
     volumes:
       - postgres_data:/var/lib/postgresql/data
+
+  nginx:
+    image: nginx:alpine
+    container_name: sms_nginx
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf:ro
+    depends_on:
+      - web
 
 volumes:
   postgres_data:
