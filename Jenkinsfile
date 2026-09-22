@@ -21,8 +21,6 @@ pipeline {
             steps {
                 script {
                     echo 'Starting static code analysis...'
-                    // We run SonarScanner. In a real environment, you use withSonarQubeEnv('SonarQube') { ... }
-                    // To keep the pipeline flexible, we run it and handle any missing credentials gracefully
                     try {
                         sh 'sonar-scanner -Dsonar.projectKey=aws-devops-cicd-django-deployment -Dsonar.sources=app'
                     } catch (Exception e) {
